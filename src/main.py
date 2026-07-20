@@ -9,7 +9,19 @@ You will implement the functions in recommender.py:
 - recommend_songs
 """
 
-from src.recommender import load_songs, recommend_songs
+from src.recommender import load_songs, recommend_songs, format_recommendations_table, SCORING_MODES
+
+
+def run_profile(songs, user_prefs, mode="balanced", diversify=False, k=5) -> None:
+    recommendations = recommend_songs(user_prefs, songs, k=k, mode=mode, diversify=diversify)
+
+    print(
+        f"\nUser profile: genre={user_prefs['favorite_genre']}, "
+        f"mood={user_prefs['favorite_mood']}, energy={user_prefs['target_energy']} "
+        f"(mode={mode}, diversify={diversify})"
+    )
+    print()
+    print(format_recommendations_table(recommendations))
 
 
 def main() -> None:
@@ -17,20 +29,18 @@ def main() -> None:
     print(f"Loaded songs: {len(songs)}")
 
     # Starter example profile
-    user_prefs = {"favorite_genre": "pop", "favorite_mood": "happy", "target_energy": 0.8}
+    user_prefs = {
+        "favorite_genre": "pop",
+        "favorite_mood": "happy",
+        "target_energy": 0.8,
+        "likes_acoustic": False,
+        "favorite_vibe": "euphoric",
+    }
 
-    recommendations = recommend_songs(user_prefs, songs, k=5)
+    for mode in SCORING_MODES:
+        run_profile(songs, user_prefs, mode=mode)
 
-    print(f"\nUser profile: genre={user_prefs['favorite_genre']}, "
-          f"mood={user_prefs['favorite_mood']}, energy={user_prefs['target_energy']}")
-    print("\nTop recommendations:\n")
-    for rec in recommendations:
-        # You decide the structure of each returned item.
-        # A common pattern is: (song, score, explanation)
-        song, score, explanation = rec
-        print(f"{song['title']} ({song['artist']}) - Score: {score:.2f}")
-        print(f"Because: {explanation}")
-        print()
+    run_profile(songs, user_prefs, mode="balanced", diversify=True)
 
 
 if __name__ == "__main__":

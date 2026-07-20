@@ -1,21 +1,21 @@
-id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
-1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18
-2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71
-3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10
-4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86
-5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05
-6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92
-7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89
-8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
-9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
-10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
-11,Concrete Bloom,Trap Lantern,hip-hop,energetic,0.85,95,0.62,0.88,0.08
-12,Riverbank Letters,Willow & Fern,folk,sad,0.31,84,0.28,0.39,0.90
-13,Iron Descent,Voltline,metal,intense,0.97,168,0.35,0.55,0.03
-14,Moonlit Sonata Sketch,Elena Voss,classical,romantic,0.25,66,0.55,0.22,0.95
-15,Velvet Hours,Slow Stereo,r&b,romantic,0.48,88,0.68,0.70,0.45
-16,Neon Pulse Overdrive,Max Pulse,edm,energetic,0.95,128,0.80,0.91,0.04
-17,Dirt Road Home,Willow & Fern,country,sad,0.44,100,0.42,0.50,0.68
-18,Sunset Sway,Indigo Parade,reggae,happy,0.55,92,0.75,0.72,0.40
-19,Victory Lap,Orbit Bloom,pop,triumphant,0.88,126,0.86,0.75,0.15
-20,Quiet Harbor,Elena Voss,classical,relaxed,0.22,58,0.50,0.20,0.97
+id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness,popularity,release_decade,is_nostalgic,is_aggressive,is_euphoric
+1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18,88,2020s,false,false,true
+2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71,54,2020s,true,false,false
+3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10,61,2000s,false,true,false
+4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86,47,2020s,true,false,false
+5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05,72,2010s,false,true,true
+6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92,39,2010s,true,false,false
+7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89,44,1990s,true,false,false
+8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22,58,1980s,true,false,false
+9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78,50,2020s,false,false,false
+10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35,66,2010s,false,false,true
+11,Concrete Bloom,Trap Lantern,hip-hop,energetic,0.85,95,0.62,0.88,0.08,79,2020s,false,true,false
+12,Riverbank Letters,Willow & Fern,folk,sad,0.31,84,0.28,0.39,0.90,33,2000s,true,false,false
+13,Iron Descent,Voltline,metal,intense,0.97,168,0.35,0.55,0.03,55,2000s,false,true,false
+14,Moonlit Sonata Sketch,Elena Voss,classical,romantic,0.25,66,0.55,0.22,0.95,29,1980s,true,false,false
+15,Velvet Hours,Slow Stereo,r&b,romantic,0.48,88,0.68,0.70,0.45,60,1990s,true,false,true
+16,Neon Pulse Overdrive,Max Pulse,edm,energetic,0.95,128,0.80,0.91,0.04,84,2020s,false,true,true
+17,Dirt Road Home,Willow & Fern,country,sad,0.44,100,0.42,0.50,0.68,36,1990s,true,false,false
+18,Sunset Sway,Indigo Parade,reggae,happy,0.55,92,0.75,0.72,0.40,48,2000s,false,false,true
+19,Victory Lap,Orbit Bloom,pop,triumphant,0.88,126,0.86,0.75,0.15,70,2010s,false,false,true
+20,Quiet Harbor,Elena Voss,classical,relaxed,0.22,58,0.50,0.20,0.97,27,1980s,true,false,false
