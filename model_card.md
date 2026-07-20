@@ -6,59 +6,80 @@
 
 ---
 
-## 2. Intended Use  
+## 2. Goal / Task
 
-VibeMatch generates a ranked list of songs from a small catalog that best match a listener's stated genre, mood, and energy preferences. It assumes the user can articulate their taste as a few simple attributes (a favorite genre, a favorite mood, a target energy level) rather than inferring taste from listening history. It is a classroom exploration of how a content-based recommender works, not a production system — it has no accounts, no persistence, and no real listener data behind it.
-
----
-
-## 3. How the Model Works  
-
-Every song in the catalog gets a score built from three pieces: 2 points if the song's genre matches the listener's favorite genre, 1 point if the song's mood matches the listener's favorite mood, and up to 1 point based on how close the song's energy level is to the energy the listener asked for (an exact match earns the full point, and the reward shrinks the further apart they are). All songs are scored this way and then sorted from highest to lowest score, and the top few are shown to the listener along with a plain-language reason for each ("genre match", "mood match", "energy similarity").
-
-This differs from the starter logic, which just returned the first songs in the catalog with no real scoring at all — the starter shipped `TODO`s in `load_songs`, `score_song`, and `recommend_songs`, and this project's core work was implementing all three functions and the CSV-to-score-to-rank pipeline that connects them.
+VibeMatch suggests songs a listener will like based on a few taste settings they give it. It takes a favorite genre, a favorite mood, and a target energy level, and returns a ranked list of the best-matching songs from the catalog. It does not look at listening history or other users — only the attributes of the songs and the one profile it's given.
 
 ---
 
-## 4. Data  
+## 3. Data Used
 
-The catalog has grown from the original **10** songs to **20** songs. It spans genres including pop, lofi, rock, ambient, jazz, synthwave, indie pop, hip-hop, folk, metal, classical, r&b, edm, country, and reggae, and moods including happy, chill, intense, relaxed, moody, focused, energetic, sad, romantic, and triumphant. I added 10 songs specifically to cover genres and moods that weren't represented in the starter set (e.g., there was no metal, classical, or r&b song, and no "sad," "romantic," or "triumphant" mood before).
+The catalog is a CSV file with 20 songs. Each song has: `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, and `acousticness`. It started with 10 songs and I added 10 more to cover genres and moods that were missing, like metal, classical, r&b, and moods like sad, romantic, and triumphant.
 
-Even at 20 songs, most genres only have 1-2 entries, so the catalog is still far too small to reflect real musical taste — there's no representation of many popular genres (K-pop, EDM subgenres, world music, spoken word), and moods are reduced to a single label per song when real songs often blend several moods at once.
-
----
-
-## 5. Strengths  
-
-The system works best for users whose taste is "coherent" — where genre, mood, and energy preference all point in a consistent direction. For example, a Chill Lofi profile (`favorite_genre=lofi, favorite_mood=chill, target_energy=0.4`) correctly surfaces Midnight Coding and Library Rain at the top, both of which really are lofi, chill, low-energy tracks — the recommendation matches intuition exactly. The energy-similarity scoring (rewarding *closeness* to a target rather than just "high" or "low") correctly distinguishes a chill lofi song from an intense one even within the same broad mood family, which is a pattern I was worried a simpler scoring rule might miss.
+Limits: most genres only have 1-2 songs, so niche tastes get very few options. Only `genre`, `mood`, and `energy` are actually used in scoring right now — `tempo_bpm`, `valence`, `danceability`, and `acousticness` are loaded but ignored.
 
 ---
 
-## 6. Limitations and Bias 
+## 4. Algorithm Summary
 
-The scoring function does not consider `tempo_bpm`, `valence`, `danceability`, or `acousticness` (the `likes_acoustic` field on `UserProfile` isn't wired into the score at all yet), so two songs that are identical in genre, mood, and energy but wildly different in danceability or tempo will score identically. Genres like classical, metal, and country are underrepresented (1-2 songs each), so users with those tastes get very shallow recommendation lists. The system also over-prioritizes genre (2.0 points) relative to mood (1.0 point), so it can unintentionally favor users whose favorite genre happens to be well-represented in the catalog (pop, lofi) over users whose favorite mood is a strong signal but whose genre is niche. Most strikingly, the scoring function has no way to detect internally contradictory preferences — testing a profile of `favorite_genre=ambient, favorite_mood=intense, target_energy=0.3` (a self-contradictory combination, since "intense" songs tend to be high-energy) still produced a confident top-5 list, just one built by whichever partial matches happened to score highest, with no signal to the user that their inputs didn't cohere.
+Each song gets a score:
 
----
+- +2 points if the song's genre matches the user's favorite genre
+- +1 point if the song's mood matches the user's favorite mood
+- Up to +1 point based on how close the song's energy is to the user's target energy (closer = more points, not just "high energy is good")
 
-## 7. Evaluation  
-
-I tested three profiles: **High-Energy Pop** (`genre=pop, mood=happy, energy=0.9`), **Chill Lofi** (`genre=lofi, mood=chill, energy=0.4`), and a deliberately conflicting **Deep Intense** profile (`genre=ambient, mood=intense, energy=0.3`). For each, I looked at whether the #1 result actually matched the stated genre and mood, and whether the ranking order made intuitive sense given the reasons printed alongside each score.
-
-The two coherent profiles (High-Energy Pop, Chill Lofi) both produced top results that matched all three criteria and felt intuitively correct. The surprise was the Deep Intense profile: rather than failing or returning nonsense, the system produced a confident-looking ranked list topped by an ambient/chill song — technically a genre match, but not remotely "intense." That the system gives no indication that the inputs were contradictory was the most interesting finding of the evaluation.
-
-I also ran two small experiments directly against `score_song`: shifting the genre/energy weights (genre 2.0 → 1.0, energy multiplier 1.0 → 2.0) compressed the score gap between genre-matching songs and near-misses without changing the top 3 results, and removing the mood term entirely caused two same-genre, similar-energy songs with different moods (Sunrise City/happy and Victory Lap/triumphant) to tie exactly at 2.97 — concretely showing that mood is the only signal separating those two songs once genre and energy are held constant.
+All songs get scored this way, then get sorted highest to lowest, and the top few are returned along with the reasons for each score.
 
 ---
 
-## 8. Future Work  
+## 5. Observed Behavior / Biases
 
-- Wire `likes_acoustic` and `acousticness` into `score_song`, and add `tempo_bpm`/`danceability`/`valence` as optional weighted terms so users with more specific taste get more nuanced scores.
-- Add a simple contradiction check that warns a user when their stated mood and energy preference are historically uncorrelated in the catalog (e.g., "intense" moods with low energy), rather than silently returning a list.
-- Introduce a small diversity constraint on the top-k results (e.g., no more than 2 songs from the same artist) so recommendations don't cluster around one artist purely because they happen to score well.
-- Support multi-value preferences (e.g., "I like happy *or* chill") instead of a single favorite genre/mood, to better reflect how real listeners' tastes span more than one category at once.
+Genre counts for more than mood (2 points vs. 1 point), so a genre match almost always beats a mood match. This means a user who cares more about mood than genre label can get recommendations that technically fit their genre but miss their vibe. It also means genres with more songs in the catalog (like pop and lofi) get recommended more confidently than genres with only 1-2 songs.
 
 ---
 
-## 9. Personal Reflection  
+## 6. Evaluation Process
 
-Building the scoring function made it obvious that a recommender is really just a set of weighted opinions about what matters, expressed as numbers instead of sentences — choosing `GENRE_MATCH_POINTS = 2.0` over `1.0` is a value judgment about what a listener cares about most, not a neutral technical choice. The most unexpected discovery was how confidently the system produced a ranked list even when I gave it a self-contradictory profile; nothing about the code "knew" the inputs didn't make sense, it just kept adding points. That changed how I think about real recommendation apps — a system that never seems to hesitate or say "I'm not sure" isn't necessarily more accurate, it might just be less equipped to notice when its assumptions about a user have gone wrong.
+I tested three profiles:
+
+- **High-Energy Pop** (`genre=pop, mood=happy, energy=0.9`)
+- **Chill Lofi** (`genre=lofi, mood=chill, energy=0.4`)
+- **Deep Intense** (`genre=ambient, mood=intense, energy=0.3`) — a profile I made up on purpose to contradict itself, since "intense" songs are usually high energy, not low.
+
+The first two profiles gave results that matched my intuition right away. The third one was the interesting case: the system still gave a confident top-5 list, just built from whatever partial matches scored highest, with no sign that the inputs didn't make sense together.
+
+I also ran two small experiments directly on the scoring code:
+
+- Lowered the genre weight and raised the energy weight — the top 3 results stayed the same, but the score gap between them and the next songs got much smaller.
+- Removed the mood check entirely — two pop songs with different moods (one happy, one triumphant) tied at the exact same score, showing mood was the only thing telling them apart.
+
+---
+
+## 7. Intended Use and Non-Intended Use
+
+**Intended use:** a classroom exercise to explore how a simple content-based recommender turns a few taste attributes into a ranked list, and to practice noticing bias and limitations in that process.
+
+**Not intended for:**
+- Real listeners or a production app — the catalog is tiny and made up.
+- Any claim that this is how real streaming platforms work — real systems mostly use collaborative filtering plus much larger, learned models, not a hand-picked point system.
+- Any use where the ranking needs to be fair across many users — this system has no way to check or correct for the genre-over-mood bias described above.
+
+---
+
+## 8. Ideas for Improvement
+
+1. Add `acousticness`, `tempo_bpm`, and `danceability` into the scoring, and actually use `likes_acoustic` instead of ignoring it.
+2. Add a check that flags contradictory profiles (like "intense" mood with very low target energy) instead of silently returning a confident-looking list.
+3. Add a diversity rule so the top results don't all come from the same artist or the same 1-2 well-represented genres.
+
+---
+
+## 9. Personal Reflection
+
+My biggest learning moment was seeing that a recommender is really just a list of weighted opinions turned into numbers — deciding genre is worth 2 points and mood is worth 1 point is a value judgment, not a neutral fact, and changing that number changes what the system "believes" a listener cares about.
+
+I used my AI coding assistant throughout: to research collaborative vs. content-based filtering before writing any code, to help design the scoring formula and explain why both a scoring rule and a ranking rule are needed, and to implement `load_songs`, `score_song`, and `recommend_songs`. I double-checked its work by actually running the weight-shift and mood-removal experiments myself instead of trusting a description of what "should" happen — one of my first draft claims about the weight-shift experiment turned out to be wrong when I actually ran it, so I corrected it against the real output.
+
+What surprised me most is how confident a very simple algorithm can feel. Even a plain point-adding system with no learning at all produced ranked lists that felt intuitive for normal profiles, and it never hesitated even on a profile I deliberately made contradictory — it just added up whatever points existed. That's what changed my thinking about real recommendation apps: a system sounding confident says nothing about whether its assumptions about you were actually correct.
+
+If I kept extending this, I'd add the unused features (tempo, danceability, acousticness) to the score first, since that's the most direct way to make recommendations feel more personalized without changing the overall design.
